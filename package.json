@@ -1,0 +1,25 @@
+{
+  "name": "e4c-stellar-disbursement",
+  "version": "1.0.0",
+  "description": "Web3 infrastructure layer for E4C, managing automated settlement for cultural partners via Soroban smart contracts and Privy embedded wallets.",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "test:contract": "cargo test --manifest-path contracts/partner_escrow/Cargo.toml",
+    "build:contract": "cargo build --target wasm32-unknown-unknown --release --manifest-path contracts/partner_escrow/Cargo.toml"
+  },
+  "dependencies": {
+    "@privy-io/node": "^0.19.0",
+    "@stellar/stellar-sdk": "^13.0.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

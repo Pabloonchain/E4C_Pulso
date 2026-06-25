@@ -1,0 +1,21 @@
+# Dependency directories
+node_modules/
+
+# Compiled files
+dist/
+out/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Rust compile outputs
+target/
+**/*.rs.bk
+
+# IDEs and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
