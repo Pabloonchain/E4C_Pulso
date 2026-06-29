@@ -107,7 +107,26 @@ Para garantizar la robustez en producción, los endpoints serverless implementan
 
 ---
 
-## 6. Guía de Ejecución y Pruebas
+## 6. Integración con Stellar Disbursement Platform (SDP)
+Para escalar la distribución masiva de recompensas (USDC) a nivel escolar y regional, **E4C** se integra con la **[Stellar Disbursement Platform (SDP)](https://stellar.org/products-and-tools/disbursement-platform)**, la herramienta oficial de la SDF para desembolsos digitales masivos.
+
+### Arquitectura de Distribución de Incentivos con SDP:
+```mermaid
+graph TD
+    A[Administración Escolar / E4C Core] -->|1. Carga Batch de Alumnos / Logros| B(Stellar Disbursement Platform - SDP)
+    B -->|2. Validación de Cuentas y Conciliación| B
+    B -->|3. Transferencia Masiva de Recompensas| C[Red Stellar: USDC / Assets]
+    C -->|4. Acreditación Directa| D[Billetera Embebida / Pasaporte de Alumnos]
+```
+
+### Funciones Clave de la Integración con SDP:
+1.  **Distribución Masiva Programada**: Automatiza el desembolso mensual de USDC a miles de alumnos de manera simultánea en base a su nivel de reputación acumulado on-chain.
+2.  **Dashboard de Auditoría Escolar**: Ofrece a los colegios y entidades gubernamentales un panel web unificado para monitorear presupuestos de incentivos escolares, exportar reportes de conciliación y verificar entregas conformes.
+3.  **Enrolamiento Dinámico de Recipientes**: Vincula las cuentas de correo institucional del alumno y su billetera Stellar embebida (mapeada vía Privy) en la base de datos de beneficiarios del SDP de forma automática.
+
+---
+
+## 7. Guía de Ejecución y Pruebas
 
 ### Pre-requisitos
 *   **Node.js**: >= 18.0.0
