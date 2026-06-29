@@ -5,7 +5,7 @@
 ---
 
 ## 1. Contexto del Proyecto: ¿Qué es E4C?
-**E4C** (Education for Change) es un ecosistema innovador diseñado para combatir el **ausentismo escolar** y promover la **inclusión cultural**. El sistema incentiva la asistencia regular a clases premiando a los estudiantes con créditos intercambiables por productos y experiencias de valor educativo y cultural (entradas al cine, libros, visitas a museos, etc.). 
+**E4C** (Education for Culture) es un ecosistema innovador diseñado para combatir el **ausentismo escolar** y promover la **inclusión cultural**. El sistema incentiva la asistencia regular a clases premiando a los estudiantes con créditos intercambiables por productos y experiencias de valor educativo y cultural (entradas al cine, libros, visitas a museos, etc.). 
 
 Para que este modelo sea sostenible, escalable y transparente, los comercios y entidades adheridas (los "partners culturales") deben poder liquidar estos incentivos de forma automatizada. Adicionalmente, los méritos y logros del alumno son registrados en un **Pasaporte Estudiantil** on-chain, construyendo una reputación académica descentralizada.
 
