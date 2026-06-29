@@ -7,10 +7,9 @@ import {
   Address,
   nativeToScVal,
   BASE_FEE,
-  Keypair,
-  Account,
-  xdr
+  Account
 } from '@stellar/stellar-sdk';
+import { getKMSClient } from '../src/lib/kms';
 
 // Configuration
 const SOROBAN_RPC_URL = process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
@@ -18,33 +17,6 @@ const ESCROW_CONTRACT_ID = process.env.ESCROW_CONTRACT_ID || 'CD5L453U2XWNG2K2ND
 const ADMIN_PUBLIC_KEY = process.env.ADMIN_PUBLIC_KEY || 'GDQD...'; // ONLY public key, NO secret key exposed
 
 const rpcServer = new rpc.Server(SOROBAN_RPC_URL);
-
-/**
- * Mock KMS Client representing an integration with AWS KMS, Google Cloud KMS, or a Custodian (e.g. Fireblocks, DFNS).
- * In production, you would configure the AWS/GCP SDK here.
- */
-class KMSCustodianService {
-  /**
-   * Delegates transaction hash signing to a KMS or HSM module.
-   * This prevents storing or exposing the private key (S...) in the execution environment.
-   */
-  static async signTransactionHash(txHash: Buffer, keyId: string): Promise<Buffer> {
-    console.log(`[KMS] Delegating signature for hash: ${txHash.toString('hex')} using Key ID: ${keyId}`);
-    
-    // In production, this would make an API call:
-    // const response = await kmsClient.sign({ KeyId: keyId, Message: txHash, SigningAlgorithm: 'ECDSA_SHA_256' or 'ED25519' });
-    // return response.Signature;
-    
-    // Fallback Mock: Sign using a local keypair if configured, otherwise generate mock signature bytes
-    const mockSecret = process.env.ADMIN_SECRET_KEY;
-    if (mockSecret) {
-      const kp = Keypair.fromSecret(mockSecret);
-      return kp.sign(txHash);
-    }
-    // Return dummy 64-byte ED25519 signature
-    return Buffer.alloc(64, 0x01);
-  }
-}
 
 /**
  * Mock Redis Sequence Manager to resolve the "Sequence/Nonce Collision" problem.
@@ -65,44 +37,66 @@ class RedisSequenceManager {
   }
 }
 
+/**
+ * Utility to sanitize inputs before logging, preventing Log Injection/Forgery (OWASP A09).
+ */
+function sanitizeLog(val: string): string {
+  return val.replace(/[\r\n]/g, '').slice(0, 200);
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
   }
 
-  const { studentWallet, partnerId, amount } = req.body;
-
-  if (!studentWallet || typeof studentWallet !== 'string') {
-    return res.status(400).json({ error: 'Missing or invalid studentWallet.' });
-  }
-
-  if (partnerId === undefined || typeof partnerId !== 'number') {
-    return res.status(400).json({ error: 'Missing or invalid partnerId.' });
-  }
-
-  if (!amount || typeof amount !== 'string') {
-    return res.status(400).json({ error: 'Missing or invalid amount (must be string representing BigInt).' });
-  }
-
   try {
-    console.log(`[Disbursement API] Initiating claim_prize logic securely...`);
+    // 1. Authorization Check (OWASP A01: Broken Access Control & A07: Auth Failures)
+    const authHeader = req.headers['authorization'];
+    const secretToken = process.env.API_SECRET_TOKEN;
 
-    // 1. Fetch sequence atomically from Redis to prevent Nonce collisions (Option A / B)
+    if (secretToken) {
+      if (!authHeader || !authHeader.startsWith('Bearer ') || authHeader.split(' ')[1] !== secretToken) {
+        const attemptedToken = sanitizeLog(authHeader || 'none');
+        console.warn(`[Security Warn] Unauthorized disbursement attempt. AuthHeader: ${attemptedToken}`);
+        return res.status(401).json({ error: 'Unauthorized access.' });
+      }
+    }
+
+    const { studentWallet, partnerId, amount } = req.body;
+
+    // 2. Strict Input Validation & Sanitization (OWASP A03: Injection)
+    if (!studentWallet || typeof studentWallet !== 'string' || !/^G[A-Z2-7]{55}$/.test(studentWallet)) {
+      return res.status(400).json({ error: 'Invalid parameter: studentWallet (must be a valid Stellar public key).' });
+    }
+
+    if (partnerId === undefined || typeof partnerId !== 'number' || !Number.isInteger(partnerId) || partnerId < 0 || partnerId > 2147483647) {
+      return res.status(400).json({ error: 'Invalid parameter: partnerId (must be a non-negative 32-bit integer).' });
+    }
+
+    if (!amount || typeof amount !== 'string' || !/^\d+$/.test(amount) || BigInt(amount) <= 0n) {
+      return res.status(400).json({ error: 'Invalid parameter: amount (must be a string representing a positive integer).' });
+    }
+
+    const cleanWallet = sanitizeLog(studentWallet);
+    const cleanAmount = sanitizeLog(amount);
+    console.log(`[Disbursement API] Authorized request received for Student: ${cleanWallet}, Partner: ${partnerId}, Amount: ${cleanAmount}`);
+
+    // 3. Fetch sequence atomically from Redis to prevent Nonce collisions (Option A / B)
     const sequenceNumber = await RedisSequenceManager.acquireAndIncrementSequence(ADMIN_PUBLIC_KEY);
 
-    // 2. Load account state representation for building transaction
+    // 4. Load account state representation for building transaction
     const sourceAccount = new Account(ADMIN_PUBLIC_KEY, sequenceNumber.toString());
 
-    // 3. Build the operation calling claim_prize
+    // 5. Build the operation calling claim_prize
     const contract = new Contract(ESCROW_CONTRACT_ID);
     const operation = contract.call(
       'claim_prize',
       Address.fromString(studentWallet).toScVal(),
-      nativeToScVal(partnerId, { type: 'u32' }),
+      nativeToScVal(Number(partnerId), { type: 'u32' }),
       nativeToScVal(BigInt(amount), { type: 'i128' })
     );
 
-    // 4. Assemble the raw unsigned transaction
+    // 6. Assemble the raw unsigned transaction
     let tx = new TransactionBuilder(sourceAccount, {
       fee: BASE_FEE,
       networkPassphrase: Networks.TESTNET
@@ -111,7 +105,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .setTimeout(30)
       .build();
 
-    // 5. Simulate on Soroban to load footprint/fees
+    // 7. Simulate on Soroban to load footprint/fees
     const simulation = await rpcServer.simulateTransaction(tx);
     if (rpc.Api.isSimulationSuccess(simulation)) {
       tx = rpc.assembleTransaction(tx, simulation).build();
@@ -122,19 +116,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // 6. DELEGATED SIGNING (Option A - Standard de la Industria)
-    // We compute the raw transaction hash
-    const txHash = tx.hash();
-    
+    // 8. DELEGATED SIGNING (Option A - Standard de la Industria)
     // We request the signature from the KMS/Custodian Service without exposing private keys
-    const signature = await KMSCustodianService.signTransactionHash(txHash, 'alias/e4c-disbursement-key');
+    const kms = getKMSClient();
+    const txSigned = await kms.signTransaction(tx, process.env.KMS_KEY_ALIAS || 'alias/e4c-disbursement-key');
 
-    // Append signature to the transaction (using the 2-argument signature: publicKey and raw signature base64)
-    tx.addSignature(ADMIN_PUBLIC_KEY, signature.toString('base64'));
-
-    // 7. ASYNCHRONOUS SUBMISSION (Evita Vercel Timeouts)
+    // 9. ASYNCHRONOUS SUBMISSION (Evita Vercel Timeouts)
     // We submit to RPC network and get the transaction hash immediately
-    const submitResponse = await rpcServer.sendTransaction(tx);
+    const submitResponse = await rpcServer.sendTransaction(txSigned);
 
     if (submitResponse.status === 'ERROR') {
       return res.status(500).json({
@@ -154,7 +143,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
 
   } catch (error: any) {
-    console.error('[Disbursement API] Error processing disbursement:', error);
-    return res.status(500).json({ error: error.message });
+    const errorMsg = sanitizeLog(error.message || 'Internal Server Error');
+    console.error(`[Disbursement Error] ${errorMsg}`);
+    
+    // OWASP A05: Informar de manera genérica para evitar disclosure de detalles internos/stack traces
+    return res.status(500).json({ 
+      error: 'Disbursement failed. Please verify authorization and transaction details.' 
+    });
   }
 }
