@@ -1,5 +1,12 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Address, Env};
+use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Address, Env, Vec};
+
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct StudentPassport {
+    pub reputation: u32,
+    pub challenges: Vec<u32>,
+}
 
 #[contracttype]
 #[derive(Clone)]
@@ -7,6 +14,7 @@ pub enum DataKey {
     Admin,
     Token,
     Partner(u32),
+    StudentPassport(Address),
 }
 
 #[contract]
@@ -86,6 +94,78 @@ impl PartnerEscrowContract {
     pub fn get_partner(env: Env, partner_id: u32) -> Option<Address> {
         env.storage().instance().get(&DataKey::Partner(partner_id))
     }
+
+    /// Returns the student passport if it exists, or None.
+    pub fn get_student_passport(env: Env, student: Address) -> Option<StudentPassport> {
+        env.storage().instance().get(&DataKey::StudentPassport(student))
+    }
+
+    /// Registers a completed challenge for a student, updating their reputation score.
+    /// Only callable by the administrator.
+    pub fn add_student_challenge(
+        env: Env,
+        student: Address,
+        challenge_id: u32,
+        reputation_boost: u32,
+    ) {
+        let admin: Address = env.storage().instance().get(&DataKey::Admin).expect("not initialized");
+        admin.require_auth();
+
+        let mut passport = env
+            .storage()
+            .instance()
+            .get(&DataKey::StudentPassport(student.clone()))
+            .unwrap_or(StudentPassport {
+                reputation: 0,
+                challenges: Vec::new(&env),
+            });
+
+        // Add the challenge if it's not already achieved
+        let mut exists = false;
+        for c in passport.challenges.iter() {
+            if c == challenge_id {
+                exists = true;
+                break;
+            }
+        }
+
+        if !exists {
+            passport.challenges.push_back(challenge_id);
+            passport.reputation += reputation_boost;
+            env.storage().instance().set(&DataKey::StudentPassport(student.clone()), &passport);
+
+            // Publish event for tracking challenge completion
+            env.events().publish(
+                (symbol_short!("chal_comp"), student, challenge_id),
+                (passport.reputation, reputation_boost),
+            );
+        }
+    }
+
+    /// Directly updates/sets a student's reputation score.
+    /// Only callable by the administrator.
+    pub fn update_student_reputation(env: Env, student: Address, reputation: u32) {
+        let admin: Address = env.storage().instance().get(&DataKey::Admin).expect("not initialized");
+        admin.require_auth();
+
+        let mut passport = env
+            .storage()
+            .instance()
+            .get(&DataKey::StudentPassport(student.clone()))
+            .unwrap_or(StudentPassport {
+                reputation: 0,
+                challenges: Vec::new(&env),
+            });
+
+        passport.reputation = reputation;
+        env.storage().instance().set(&DataKey::StudentPassport(student.clone()), &passport);
+
+        // Publish event for reputation update
+        env.events().publish(
+            (symbol_short!("rep_upd"), student),
+            reputation,
+        );
+    }
 }
 
 #[cfg(test)]
@@ -138,4 +218,52 @@ mod test {
         assert_eq!(token_client.balance(&contract_id), 0);
         assert_eq!(token_client.balance(&partner_wallet), amount);
     }
+
+    #[test]
+    fn test_student_passport() {
+        let env = Env::default();
+        env.mock_all_auths();
+
+        let admin = Address::generate(&env);
+        let student = Address::generate(&env);
+
+        // Deploy Escrow Contract
+        let contract_id = env.register_contract(None, PartnerEscrowContract);
+        let client = PartnerEscrowContractClient::new(&env, &contract_id);
+
+        // Initialize escrow
+        let token_addr = Address::generate(&env);
+        client.initialize(&admin, &token_addr);
+
+        // 1. Get passport of student who doesn't have one (should be None)
+        assert!(client.get_student_passport(&student).is_none());
+
+        // 2. Add challenge
+        client.add_student_challenge(&student, &1, &100);
+
+        let passport = client.get_student_passport(&student).unwrap();
+        assert_eq!(passport.reputation, 100);
+        assert_eq!(passport.challenges.len(), 1);
+        assert_eq!(passport.challenges.get(0).unwrap(), 1);
+
+        // 3. Add same challenge again (should not duplicate or add reputation)
+        client.add_student_challenge(&student, &1, &50);
+        let passport = client.get_student_passport(&student).unwrap();
+        assert_eq!(passport.reputation, 100);
+        assert_eq!(passport.challenges.len(), 1);
+
+        // 4. Add different challenge
+        client.add_student_challenge(&student, &2, &50);
+        let passport = client.get_student_passport(&student).unwrap();
+        assert_eq!(passport.reputation, 150);
+        assert_eq!(passport.challenges.len(), 2);
+        assert_eq!(passport.challenges.get(1).unwrap(), 2);
+
+        // 5. Update reputation directly
+        client.update_student_reputation(&student, &500);
+        let passport = client.get_student_passport(&student).unwrap();
+        assert_eq!(passport.reputation, 500);
+        assert_eq!(passport.challenges.len(), 2); // challenges preserved
+    }
 }
+

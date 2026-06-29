@@ -6,6 +6,7 @@ import {
   Contract,
   Address,
   nativeToScVal,
+  scValToNative,
   BASE_FEE
 } from '@stellar/stellar-sdk';
 import * as dotenv from 'dotenv';
@@ -177,4 +178,102 @@ export function startRedemptionEventListener() {
       }
     }
   }, 10000);
+}
+
+/**
+ * Fetches the student passport details from the Soroban contract.
+ * 
+ * @param studentWallet Student's embedded Stellar wallet address
+ * @returns The passport details { reputation, challenges } or null if not found/error
+ */
+export async function getStudentPassportOnChain(
+  studentWallet: string
+): Promise<{ reputation: number; challenges: number[] } | null> {
+  const adminKeypair = getAdminKeypair();
+  console.log(`[StellarPay] Fetching student passport for ${studentWallet} on-chain...`);
+
+  try {
+    const contract = new Contract(ESCROW_CONTRACT_ID);
+    const operation = contract.call(
+      'get_student_passport',
+      Address.fromString(studentWallet).toScVal()
+    );
+
+    const sourceAccount = await rpcServer.getAccount(adminKeypair.publicKey());
+    const tx = new TransactionBuilder(sourceAccount, {
+      fee: BASE_FEE,
+      networkPassphrase: Networks.TESTNET
+    })
+      .addOperation(operation)
+      .setTimeout(30)
+      .build();
+
+    const simulation = await rpcServer.simulateTransaction(tx);
+
+    if (rpc.Api.isSimulationSuccess(simulation) && simulation.result) {
+      const scVal = simulation.result.retval;
+      if (!scVal || scVal.switch().name === 'scvVoid' || scVal.switch().value === 0) {
+        return null;
+      }
+      const native = scValToNative(scVal);
+      if (!native) return null;
+      return {
+        reputation: Number(native.reputation),
+        challenges: (native.challenges || []).map((c: any) => Number(c))
+      };
+    }
+    return null;
+  } catch (error: any) {
+    console.error('[StellarPay] Error fetching student passport:', error.message);
+    return null;
+  }
+}
+
+/**
+ * Registers a completed challenge for a student on-chain.
+ * 
+ * @param studentWallet Student's embedded Stellar wallet address
+ * @param challengeId Unique ID of the challenge completed
+ * @param reputationBoost The amount of reputation to add to the student
+ */
+export async function addStudentChallengeOnChain(
+  studentWallet: string,
+  challengeId: number,
+  reputationBoost: number
+): Promise<string> {
+  const adminKeypair = getAdminKeypair();
+  console.log(`[StellarPay] Registering challenge ID ${challengeId} (Boost: ${reputationBoost}) for student ${studentWallet}`);
+
+  const contract = new Contract(ESCROW_CONTRACT_ID);
+  const operation = contract.call(
+    'add_student_challenge',
+    Address.fromString(studentWallet).toScVal(),
+    nativeToScVal(challengeId, { type: 'u32' }),
+    nativeToScVal(reputationBoost, { type: 'u32' })
+  );
+
+  return await sendSorobanTransaction(adminKeypair, operation);
+}
+
+/**
+ * Updates a student's reputation directly on-chain.
+ * 
+ * @param studentWallet Student's embedded Stellar wallet address
+ * @param reputation New reputation score to set
+ */
+export async function updateStudentReputationOnChain(
+  studentWallet: string,
+  reputation: number
+): Promise<string> {
+  const adminKeypair = getAdminKeypair();
+  console.log(`[StellarPay] Directly updating reputation to ${reputation} for student ${studentWallet}`);
+
+  const contract = new Contract(ESCROW_CONTRACT_ID);
+  const operation = contract.call(
+    'update_student_reputation',
+    Address.fromString(studentWallet).toScVal(),
+    nativeToScVal(reputation, { type: 'u32' })
+  );
+
+  return await sendSorobanTransaction(adminKeypair, operation);
 }
