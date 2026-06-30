@@ -152,3 +152,15 @@ Puedes correr el flujo de simulación completo en TypeScript (que emula Privy, l
 npm run build
 npm start
 ```
+
+---
+
+## 8. Despliegue en Vercel & Consola Visual
+El proyecto se encuentra desplegado en producción en **Vercel** como un servicio serverless con una interfaz web interactiva premium.
+
+*   **URL de Producción:** [https://e4c-stellar-disbursement.vercel.app](https://e4c-stellar-disbursement.vercel.app)
+*   **Manual de Operación Completo:** Consulta [MANUAL.md](file:///C:/e4c-stellar-disbursement/MANUAL.md) para ver guías de uso detalladas sobre:
+    *   El **Pasaporte 3D** (control de privacidad, giro en 3D, avatar realista y medidas gráficas de seguridad).
+    *   El **Historial Ledger (On-Chain)** de desafíos con auditoría de firmas.
+    *   La **Consola Técnica** para probar endpoints de la API.
+

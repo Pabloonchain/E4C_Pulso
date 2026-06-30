@@ -1,6 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { updateStudentReputationOnChain } from '../src/stellar_pay';
 
+/**
+ * CONTROLADOR API: Actualizar Reputación Directa (Reputation).
+ * Endpoint POST que permite a un administrador fijar manualmente el puntaje de
+ * reputación académica del estudiante en el Smart Contract de Soroban.
+ */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' });
@@ -8,6 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { studentWallet, reputation } = req.body;
 
+  // Validaciones básicas de parámetros
   if (!studentWallet || typeof studentWallet !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid studentWallet.' });
   }
@@ -17,7 +23,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // ACTUALIZACIÓN BLOCKCHAIN: Ejecuta la llamada de escritura en Soroban
     const txHash = await updateStudentReputationOnChain(studentWallet, reputation);
+    
     return res.status(200).json({
       success: true,
       message: `Student reputation updated to ${reputation}.`,

@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E4C - Stellar Student Passport & Disbursement</title>
+  <meta name="description" content="Pasaporte Estudiantil Digital de E4C e infraestructura Web3.">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #060913;
+      --card-bg: rgba(13, 20, 35, 0.65);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent-primary: #6366f1; /* Indigo */
+      --accent-secondary: #06b6d4; /* Cyan */
+      --accent-success: #10b981; /* Emerald */
+      --accent-warning: #f59e0b; /* Amber */
+      --accent-gold: #d4af37; /* Gold */
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --glow-purple: rgba(99, 102, 241, 0.18);
+      --glow-cyan: rgba(6, 182, 212, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Ambient background glows */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--glow-purple) 0%, transparent 70%);
+      top: -200px;
+      left: 10%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, var(--glow-cyan) 0%, transparent 70%);
+      top: 30%;
+      right: 10%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    header {
+      backdrop-filter: blur(16px);
+      background-color: rgba(6, 9, 19, 0.8);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+    }
+
+    .logo-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #ffffff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    /* --- HERO SHOWCASE (PASSPORT CENTER STAGE) --- */
+    .showcase-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1.5rem;
+      gap: 2rem;
+      min-height: calc(100vh - 80px);
+    }
+
+    .showcase-header {
+      text-align: center;
+      max-width: 600px;
+      animation: fadeInDown 0.8s ease;
+    }
+
+    .showcase-header h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.65rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 40%, #c7d2fe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .showcase-header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    /* PASSPORT CONTAINER */
+    .passport-flip-container {
+      perspective: 2000px;
+      width: 100%;
+      max-width: 600px;
+      height: 385px;
+      cursor: pointer;
+      animation: zoomIn 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .passport-card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .passport-flip-container:hover .passport-card.hover-flip {
+      transform: rotateY(15deg) rotateX(3deg);
+    }
+
+    .passport-card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .passport-front, .passport-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 1.5rem;
+      padding: 1.85rem;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.75), inset 0 1px 3px rgba(255,255,255,0.15);
+      overflow: hidden;
+    }
+
+    /* Front side (Identity) */
+    .passport-front {
+      background: linear-gradient(135deg, #152035 0%, #0c1221 60%, #06090e 100%);
+      border: 1.5px solid rgba(212, 175, 55, 0.35);
+    }
+
+    /* Fine security line pattern simulation */
+    .passport-front::before, .passport-back::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(212, 175, 55, 0.05) 1.2px, transparent 1.2px),
+                        repeating-linear-gradient(45deg, rgba(6, 182, 212, 0.02) 0px, rgba(6, 182, 212, 0.02) 2px, transparent 2px, transparent 10px);
+      background-size: 18px 18px, 100% 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Holographic sheen overlay */
+    .holo-sheen {
+      position: absolute;
+      inset: -50%;
+      background: linear-gradient(
+        120deg,
+        transparent 35%,
+        rgba(255, 255, 255, 0.09) 45%,
+        rgba(6, 182, 212, 0.15) 50%,
+        rgba(99, 102, 241, 0.09) 55%,
+        transparent 65%
+      );
+      transform: rotate(25deg);
+      transition: transform 0.6s ease;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .passport-flip-container:hover .holo-sheen {
+      transform: translate(25%, 25%) rotate(25deg);
+    }
+
+    /* Security watermark */
+    .passport-watermark {
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border: 2px dashed rgba(212, 175, 55, 0.035);
+      border-radius: 50%;
+      top: 15%;
+      right: 5%;
+      pointer-events: none;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(-15deg);
+    }
+
+    .passport-watermark::after {
+      content: 'E4C SECURITY SEAL';
+      font-size: 0.48rem;
+      color: rgba(212, 175, 55, 0.035);
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-align: center;
+    }
+
+    /* Passport elements */
+    .passport-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    .passport-header-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      letter-spacing: 0.15em;
+      color: var(--accent-gold);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .passport-header-sub {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      margin-top: 0.15rem;
+    }
+
+    .passport-chip {
+      width: 2.6rem;
+      height: 2rem;
+      background: linear-gradient(135deg, #e5c158 0%, #b8860b 50%, #f7dc6f 100%);
+      border-radius: 0.3rem;
+      position: relative;
+      border: 1px solid rgba(0,0,0,0.25);
+    }
+
+    .passport-chip::after {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border: 1px solid rgba(0,0,0,0.15);
+      border-radius: 2px;
+      background-image: linear-gradient(90deg, transparent 45%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.15) 55%, transparent 55%),
+                        linear-gradient(0deg, transparent 45%, rgba(0,0,0,0.15) 45%, rgba(0,0,0,0.15) 55%, transparent 55%);
+    }
+
+    .passport-body {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 1.5rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Avatar frame */
+    .passport-avatar-container {
+      width: 130px;
+      height: 168px;
+      border: 2px solid rgba(212, 175, 55, 0.45);
+      border-radius: 0.6rem;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+      background-color: #070a14;
+    }
+
+    .passport-avatar {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .passport-avatar-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 65%, rgba(6, 9, 19, 0.85) 100%);
+      pointer-events: none;
+    }
+
+    /* Photo Hologram Sticker overlay */
+    .photo-hologram {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.75) 0%, rgba(6,182,212,0.35) 50%, rgba(99,102,241,0.5) 100%);
+      border: 1px solid rgba(255,255,255,0.45);
+      opacity: 0.7;
+      z-index: 10;
+      mix-blend-mode: overlay;
+      box-shadow: 0 0 10px rgba(255,255,255,0.3);
+      pointer-events: none;
+    }
+
+    /* Passport Details */
+    .passport-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.65rem 0.5rem;
+    }
+
+    .info-block {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .info-label {
+      font-size: 0.55rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.1rem;
+    }
+
+    .info-value-container {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .info-value {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
+      transition: all 0.15s ease;
+    }
+
+    .info-value.masked {
+      font-family: 'Courier Prime', monospace;
+      letter-spacing: 0.06em;
+      color: #38bdf8;
+    }
+
+    /* Eye toggle icon button */
+    .btn-eye {
+      background: transparent;
+      border: none;
+      color: var(--accent-secondary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.25rem;
+      border-radius: 0.25rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-eye:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-eye svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .passport-footer {
+      margin-top: 1.25rem;
+      border-top: 1px dashed rgba(212, 175, 55, 0.25);
+      padding-top: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .mrz-code {
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.16em;
+      color: rgba(255, 255, 255, 0.38);
+      line-height: 1.3;
+    }
+
+    /* Back side (Visa Stamps Achievements) */
+    .passport-back {
+      background: linear-gradient(135deg, #111b2d 0%, #080c14 100%);
+      border: 1.5px solid rgba(6, 182, 212, 0.35);
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .passport-back-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      color: var(--accent-secondary);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      border-bottom: 1px dashed rgba(6, 182, 212, 0.25);
+      padding-bottom: 0.6rem;
+      margin-bottom: 0.9rem;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Visas stamps layout */
+    .stamps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      align-items: center;
+      justify-items: center;
+      flex-grow: 1;
+      position: relative;
+      z-index: 2;
+    }
+
+    .stamp-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.45rem;
+      text-align: center;
+      position: relative;
+      transition: transform 0.2s ease;
+    }
+
+    .stamp-container:hover {
+      transform: scale(1.12) rotate(2deg);
+    }
+
+    .stamp-circle {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      padding: 3px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 2.5px dashed var(--accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+      transform: rotate(-6deg);
+    }
+
+    .stamp-container:nth-child(2) .stamp-circle {
+      border-color: var(--accent-secondary);
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+      transform: rotate(8deg);
+    }
+
+    .stamp-container:nth-child(3) .stamp-circle {
+      border-color: var(--accent-success);
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+      transform: rotate(-10deg);
+    }
+
+    .stamp-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      opacity: 0.88;
+      filter: contrast(1.15) brightness(0.95);
+      mix-blend-mode: screen;
+    }
+
+    .stamp-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      max-width: 110px;
+      line-height: 1.2;
+    }
+
+    .stamp-container:nth-child(1) .stamp-label { color: #fcd34d; }
+    .stamp-container:nth-child(2) .stamp-label { color: #67e8f9; }
+    .stamp-container:nth-child(3) .stamp-label { color: #6ee7b7; }
+
+    .passport-btn-flip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    }
+
+    .passport-btn-flip:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255,255,255,0.25);
+      transform: translateY(-2px);
+    }
+
+    .passport-btn-flip.tech-btn {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(6, 182, 212, 0.15));
+      border: 1.5px solid rgba(6, 182, 212, 0.35);
+    }
+
+    .passport-btn-flip.tech-btn:hover {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(6, 182, 212, 0.25));
+      border-color: rgba(6, 182, 212, 0.6);
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+    }
+
+    .showcase-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      width: 100%;
+      margin-top: 1rem;
+      animation: fadeInUp 1s ease;
+    }
+
+    .passport-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      font-style: italic;
+      margin-top: 0.25rem;
+    }
+
+    /* --- TIMELINE LEDGER --- */
+    .ledger-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .status-dot-pulse {
+      width: 0.6rem;
+      height: 0.6rem;
+      background-color: var(--accent-success);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-success);
+      animation: pulseGlow 2s infinite;
+    }
+
+    .ledger-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .ledger-item {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--card-border);
+      border-radius: 0.75rem;
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .ledger-item:hover {
+      border-color: rgba(6, 182, 212, 0.35);
+      background: rgba(6, 182, 212, 0.04);
+    }
+
+    .ledger-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ledger-item-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .ledger-item-date {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .ledger-item-details {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .tx-hash-link {
+      font-family: 'Courier Prime', monospace;
+      color: var(--accent-secondary);
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 0.78rem;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 320px;
+      transition: color 0.15s ease;
+    }
+
+    .tx-hash-link:hover {
+      color: white;
+      text-decoration: underline;
+    }
+
+    .badge-reputation {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .tx-details-dropdown {
+      display: none;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-family: 'Courier Prime', monospace;
+      font-size: 0.75rem;
+      color: #a3a3a3;
+      margin-top: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      line-height: 1.6;
+    }
+
+    .tx-details-dropdown.active {
+      display: block;
+      animation: slideDownFade 0.25s ease-out;
+    }
+
+    /* --- TECH DETAIL PANEL --- */
+    .tech-panel-section {
+      max-width: 900px;
+      width: 90%;
+      margin: 0 auto 4rem auto;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .tech-panel-section.active {
+      display: block;
+      opacity: 1;
+      animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tech-panel-section .glass-card {
+      padding: 2rem;
+    }
+
+    /* Keyframe Animations */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes slideUpFade {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideDownFade {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+      70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">E</div>
+      <div class="logo-text">E4C Integration</div>
+    </div>
+    <span class="badge">STELLAR & SOROBAN</span>
+  </header>
+
+  <!-- Main Showcase Section -->
+  <section class="showcase-section">
+    <div class="showcase-header">
+      <h1>Pasaporte Estudiantil Digital</h1>
+      <p>Credenciales de logros y liquidación de incentivos educativos</p>
+    </div>
+
+    <!-- 3D Card Flip Container -->
+    <div class="passport-flip-container" onclick="toggleFlip()">
+      <div class="passport-card hover-flip" id="passportCard">
+        
+        <!-- FRONT SIDE (Identity Details) -->
+        <div class="passport-front">
+          <div class="holo-sheen"></div>
+          <div class="passport-watermark"></div>
+          
+          <div class="passport-header">
+            <div>
+              <div class="passport-header-title">E4C PASAPORTE ESTUDIANTIL</div>
+              <div class="passport-header-sub">REPÚBLICA ARGENTINA • INFRAESTRUCTURA WEB3</div>
+            </div>
+            <div class="passport-chip"></div>
+          </div>
+          
+          <div class="passport-body">
+            <!-- Photo Container -->
+            <div class="passport-avatar-container">
+              <img src="/assets/avatar.jpg" alt="Student Passport Photo" class="passport-avatar">
+              <div class="passport-avatar-overlay"></div>
+              <div class="photo-hologram"></div>
+            </div>
+            
+            <!-- Info grid -->
+            <div class="passport-info">
+              <!-- Name Row (Span 2) -->
+              <div class="info-block" style="grid-column: span 2;">
+                <span class="info-label">Apellidos y Nombres / Surname & Names</span>
+                <div class="info-value-container">
+                  <span class="info-value masked" id="studentName" data-real="GOMEZ PABLO SEBASTIÁN" data-masked="G●●●Z P●●●O S●●●●●●IÁN">G●●●Z P●●●O S●●●●●●IÁN</span>
+                  <button class="btn-eye" id="btn-studentName" onclick="toggleField(event, 'studentName');" title="Mostrar/Ocultar Nombre">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Document (DNI) -->
+              <div class="info-block">
+                <span class="info-label">Nro. Documento / DNI</span>
+                <div class="info-value-container">
+                  <span class="info-value masked" id="studentDni" data-real="42.671.789" data-masked="●●.●●●.789">●●.●●●.789</span>
+                  <button class="btn-eye" id="btn-studentDni" onclick="toggleField(event, 'studentDni');" title="Mostrar/Ocultar DNI">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- School -->
+              <div class="info-block">
+                <span class="info-label">Escuela / School</span>
+                <span class="info-value" style="color: #ffffff;">Aida Mastrazzi</span>
+              </div>
+              
+              <!-- Course -->
+              <div class="info-block">
+                <span class="info-label">Curso / Course</span>
+                <div class="info-value-container">
+                  <span class="info-value masked" id="studentCourse" data-real="1ro 3ra" data-masked="●ro ●ra">●ro ●ra</span>
+                  <button class="btn-eye" id="btn-studentCourse" onclick="toggleField(event, 'studentCourse');" title="Mostrar/Ocultar Curso">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Nationality -->
+              <div class="info-block">
+                <span class="info-label">Nacionalidad / Nationality</span>
+                <span class="info-value">ARGENTINA</span>
+              </div>
+              
+              <!-- Wallet (Span 2) -->
+              <div class="info-block" style="grid-column: span 2;">
+                <span class="info-label">Dirección Wallet / Stellar Wallet</span>
+                <div class="info-value-container">
+                  <span class="info-value masked" id="studentWallet" data-real="GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777" data-masked="GB2Z46...XYZ77777" style="font-size: 0.75rem; color: var(--accent-secondary);">GB2Z46...XYZ77777</span>
+                  <button class="btn-eye" id="btn-studentWallet" onclick="toggleField(event, 'studentWallet');" title="Mostrar/Ocultar Billetera">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="passport-footer">
+            <span class="mrz-code">PESARGOMEZ<<PABLO<SEBASTIAN<<<<<<<<<<<<<<<<<<DNIXX.XXX.789<GB2Z46...XYZ77777</span>
+            <!-- Simple SVG barcode decoration -->
+            <svg width="45" height="13" style="opacity: 0.35; margin-left: 10px;" viewBox="0 0 45 13">
+              <rect x="0" width="2" height="13" fill="white"/>
+              <rect x="3" width="1" height="13" fill="white"/>
+              <rect x="5" width="3" height="13" fill="white"/>
+              <rect x="10" width="1" height="13" fill="white"/>
+              <rect x="12" width="2" height="13" fill="white"/>
+              <rect x="16" width="3" height="13" fill="white"/>
+              <rect x="21" width="1" height="13" fill="white"/>
+              <rect x="23" width="2" height="13" fill="white"/>
+              <rect x="27" width="4" height="13" fill="white"/>
+              <rect x="33" width="1" height="13" fill="white"/>
+              <rect x="35" width="2" height="13" fill="white"/>
+              <rect x="39" width="3" height="13" fill="white"/>
+              <rect x="43" width="1" height="13" fill="white"/>
+            </svg>
+          </div>
+        </div>
+        
+        <!-- BACK SIDE (Visa Stamps Achievements) -->
+        <div class="passport-back">
+          <div class="holo-sheen"></div>
+          <div class="passport-back-title">Logros Académicos Certificados</div>
+          
+          <div class="stamps-grid">
+            <!-- Stamp 1: Asistencia Perfecta -->
+            <div class="stamp-container">
+              <div class="stamp-circle">
+                <img src="/assets/badge_attendance.jpg" alt="Asistencia Perfecta Badge" class="stamp-img">
+              </div>
+              <div class="stamp-label">Asistencia Perfecta</div>
+            </div>
+            
+            <!-- Stamp 2: Mejor Alumno -->
+            <div class="stamp-container">
+              <div class="stamp-circle">
+                <img src="/assets/badge_best_student.jpg" alt="Mejor Alumno Badge" class="stamp-img">
+              </div>
+              <div class="stamp-label">Mejor Alumno</div>
+            </div>
+            
+            <!-- Stamp 3: 8.99 en Matemáticas -->
+            <div class="stamp-container">
+              <div class="stamp-circle">
+                <img src="/assets/badge_math.jpg" alt="Matemáticas Badge" class="stamp-img">
+              </div>
+              <div class="stamp-label">Matemáticas (8.99)</div>
+            </div>
+          </div>
+          
+          <div class="passport-footer" style="justify-content: center; border-top: 1px dashed rgba(6, 182, 212, 0.2);">
+            <span class="passport-hint">Verificado en Stellar Testnet a través de Soroban</span>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Actions Box -->
+    <div class="showcase-actions">
+      <button class="passport-btn-flip" onclick="toggleFlip(); event.stopPropagation();">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        Girar Pasaporte (Ver Sellos)
+      </button>
+
+      <button class="passport-btn-flip tech-btn" id="togglePanelBtn" onclick="toggleTechPanel(); event.stopPropagation();">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+        Ver Panel de Pruebas (API)
+      </button>
+    </div>
+    
+    <p class="passport-hint">Haz clic sobre la credencial para voltearla en 3D o pulsa en los ojos (👁️) para ver los datos.</p>
+  </section>
+
+  <!-- Collapsible Technical Explorer Section -->
+  <section class="tech-panel-section" id="techPanelSection">
+    <div class="glass-card tabs-container">
+      <div style="border-bottom: 1px solid var(--card-border); padding-bottom: 0.75rem;">
+        <h3 style="font-family: 'Outfit', sans-serif; font-weight: 700;">Consola de Desarrollo Serverless</h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">Prueba manual de los endpoints del backend y visualización de transacciones ledger</p>
+      </div>
+
+      <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab('passport')">Pasaporte (GET)</button>
+        <button class="tab-btn" onclick="switchTab('disbursement')">Desembolso (POST)</button>
+        <button class="tab-btn" onclick="switchTab('challenge')">Desafío (POST)</button>
+        <button class="tab-btn" onclick="switchTab('reputation')">Reputación (POST)</button>
+        <button class="tab-btn" onclick="switchTab('claim')">Liquidación (POST)</button>
+        <button class="tab-btn" onclick="switchTab('ledger')">Historial Ledger (On-Chain)</button>
+      </div>
+
+      <!-- Tab Content: Passport -->
+      <div id="tab-passport" class="tab-content">
+        <form onsubmit="handleSubmit(event, '/api/passport', 'GET')">
+          <div class="form-group">
+            <label for="pass-wallet">Student Stellar Wallet Address (Public Key)</label>
+            <input type="text" id="pass-wallet" placeholder="e.g. GB2Z46..." required value="GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777">
+          </div>
+          <button type="submit" class="btn-submit">Consultar Pasaporte</button>
+        </form>
+      </div>
+
+      <!-- Tab Content: Disbursement -->
+      <div id="tab-disbursement" class="tab-content" style="display: none;">
+        <form onsubmit="handleSubmit(event, '/api/disbursement', 'POST')">
+          <div class="form-group">
+            <label for="disb-wallet">Student Stellar Wallet Address</label>
+            <input type="text" id="disb-wallet" placeholder="e.g. GB2Z46..." required value="GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777">
+          </div>
+          <div class="form-group">
+            <label for="disb-partner">Partner ID</label>
+            <input type="number" id="disb-partner" value="101" required>
+          </div>
+          <div class="form-group">
+            <label for="disb-amount">USDC Amount (7 decimals base)</label>
+            <input type="text" id="disb-amount" value="10000000" required>
+          </div>
+          <div class="form-group">
+            <label for="disb-token">Authorization Token (API Secret)</label>
+            <input type="password" id="disb-token" placeholder="Bearer Token">
+          </div>
+          <button type="submit" class="btn-submit">Ejecutar Desembolso Seguro</button>
+        </form>
+      </div>
+
+      <!-- Tab Content: Challenge -->
+      <div id="tab-challenge" class="tab-content" style="display: none;">
+        <form onsubmit="handleSubmit(event, '/api/challenge', 'POST')">
+          <div class="form-group">
+            <label for="chal-wallet">Student Stellar Wallet Address</label>
+            <input type="text" id="chal-wallet" required value="GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777">
+          </div>
+          <div class="form-group">
+            <label for="chal-id">Challenge ID</label>
+            <input type="number" id="chal-id" value="401" required>
+          </div>
+          <div class="form-group">
+            <label for="chal-boost">Reputation Boost (Points)</label>
+            <input type="number" id="chal-boost" value="150" required>
+          </div>
+          <button type="submit" class="btn-submit">Registrar Logro / Desafío</button>
+        </form>
+      </div>
+
+      <!-- Tab Content: Reputation -->
+      <div id="tab-reputation" class="tab-content" style="display: none;">
+        <form onsubmit="handleSubmit(event, '/api/reputation', 'POST')">
+          <div class="form-group">
+            <label for="rep-wallet">Student Stellar Wallet Address</label>
+            <input type="text" id="rep-wallet" required value="GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777">
+          </div>
+          <div class="form-group">
+            <label for="rep-points">New Reputation Points Score</label>
+            <input type="number" id="rep-points" value="500" required>
+          </div>
+          <button type="submit" class="btn-submit">Actualizar Reputación Directa</button>
+        </form>
+      </div>
+
+      <!-- Tab Content: Claim -->
+      <div id="tab-claim" class="tab-content" style="display: none;">
+        <form onsubmit="handleSubmit(event, '/api/claim', 'POST')">
+          <div class="form-group">
+            <label for="claim-wallet">Student Stellar Wallet Address</label>
+            <input type="text" id="claim-wallet" required value="GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777">
+          </div>
+          <div class="form-group">
+            <label for="claim-partner">Partner ID</label>
+            <input type="number" id="claim-partner" value="101" required>
+          </div>
+          <div class="form-group">
+            <label for="claim-amount">Amount</label>
+            <input type="text" id="claim-amount" value="10000000" required>
+          </div>
+          <button type="submit" class="btn-submit">Procesar Reclamo</button>
+        </form>
+      </div>
+
+      <!-- Tab Content: Ledger Timeline -->
+      <div id="tab-ledger" class="tab-content" style="display: none;">
+        <div class="ledger-title" style="border: none; margin-bottom: 0.75rem; padding-bottom: 0;">
+          <span class="status-dot-pulse"></span>
+          <span>Historial de Desafíos & Transacciones Ledger</span>
+        </div>
+        
+        <div class="ledger-timeline">
+          <!-- Item 1: Perfect Attendance -->
+          <div class="ledger-item">
+            <div class="ledger-item-header">
+              <span class="ledger-item-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Desafío: Asistencia Perfecta (Perfect Attendance)
+              </span>
+              <span class="ledger-item-date">28 Jun 2026, 10:14 AM</span>
+            </div>
+            <div class="ledger-item-details">
+              <span class="badge-reputation">+150 Puntos</span>
+              <a class="tx-hash-link" onclick="toggleTxDetails('tx-details-1')" title="Ver detalles de la transacción en Stellar">
+                Tx: 7ad62f3e82b9a10c...d7c6d7
+              </a>
+            </div>
+            <div class="tx-details-dropdown" id="tx-details-1">
+              <strong>STELLAR SOROBAN INVOCATION DETAILS:</strong><br>
+              • Ledger Block: #52891043<br>
+              • Contract: CD5L453U2XWNG2K2ND5L4W7LWD6Z5N2WCD5L4W7LWD6Z5N2WCD5L4W7L<br>
+              • Function: add_student_challenge(student, challenge_id, boost)<br>
+              • Args:<br>
+              &nbsp;&nbsp;&nbsp;- student_wallet: Address("GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777")<br>
+              &nbsp;&nbsp;&nbsp;- challenge_id: 401 (u32)<br>
+              &nbsp;&nbsp;&nbsp;- reputation_boost: 150 (u32)<br>
+              • Signer Authority: GDQDADMINAUTHORITYPUBLICKEY77777 (require_auth)<br>
+              • Fee Spent: 100 Stroops (0.00001 XLM)<br>
+              • Status: SUCCESS (Transaction Confirmed on Ledger)
+            </div>
+          </div>
+
+          <!-- Item 2: Best Student -->
+          <div class="ledger-item">
+            <div class="ledger-item-header">
+              <span class="ledger-item-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fcd34d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Desafío: Mejor Alumno (Best Student Honor Roll)
+              </span>
+              <span class="ledger-item-date">29 Jun 2026, 02:32 PM</span>
+            </div>
+            <div class="ledger-item-details">
+              <span class="badge-reputation">+250 Puntos</span>
+              <a class="tx-hash-link" onclick="toggleTxDetails('tx-details-2')" title="Ver detalles de la transacción en Stellar">
+                Tx: 2ef9518d6e3bc04d...d7e8b2
+              </a>
+            </div>
+            <div class="tx-details-dropdown" id="tx-details-2">
+              <strong>STELLAR SOROBAN INVOCATION DETAILS:</strong><br>
+              • Ledger Block: #52912401<br>
+              • Contract: CD5L453U2XWNG2K2ND5L4W7LWD6Z5N2WCD5L4W7LWD6Z5N2WCD5L4W7L<br>
+              • Function: add_student_challenge(student, challenge_id, boost)<br>
+              • Args:<br>
+              &nbsp;&nbsp;&nbsp;- student_wallet: Address("GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777")<br>
+              &nbsp;&nbsp;&nbsp;- challenge_id: 402 (u32)<br>
+              &nbsp;&nbsp;&nbsp;- reputation_boost: 250 (u32)<br>
+              • Signer Authority: GDQDADMINAUTHORITYPUBLICKEY77777 (require_auth)<br>
+              • Fee Spent: 100 Stroops (0.00001 XLM)<br>
+              • Status: SUCCESS (Transaction Confirmed on Ledger)
+            </div>
+          </div>
+
+          <!-- Item 3: Outstanding Math Grade -->
+          <div class="ledger-item">
+            <div class="ledger-item-header">
+              <span class="ledger-item-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                Desafío: Matemáticas (Desempeño Excelente - Nota 8.99)
+              </span>
+              <span class="ledger-item-date">30 Jun 2026, 11:05 AM</span>
+            </div>
+            <div class="ledger-item-details">
+              <span class="badge-reputation">+200 Puntos</span>
+              <a class="tx-hash-link" onclick="toggleTxDetails('tx-details-3')" title="Ver detalles de la transacción en Stellar">
+                Tx: c9b0e2f3a4b5c6d7...a8b9c0
+              </a>
+            </div>
+            <div class="tx-details-dropdown" id="tx-details-3">
+              <strong>STELLAR SOROBAN INVOCATION DETAILS:</strong><br>
+              • Ledger Block: #52960488<br>
+              • Contract: CD5L453U2XWNG2K2ND5L4W7LWD6Z5N2WCD5L4W7LWD6Z5N2WCD5L4W7L<br>
+              • Function: add_student_challenge(student, challenge_id, boost)<br>
+              • Args:<br>
+              &nbsp;&nbsp;&nbsp;- student_wallet: Address("GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777")<br>
+              &nbsp;&nbsp;&nbsp;- challenge_id: 403 (u32)<br>
+              &nbsp;&nbsp;&nbsp;- reputation_boost: 200 (u32)<br>
+              • Signer Authority: GDQDADMINAUTHORITYPUBLICKEY77777 (require_auth)<br>
+              • Fee Spent: 100 Stroops (0.00001 XLM)<br>
+              • Status: SUCCESS (Transaction Confirmed on Ledger)
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result Terminal -->
+      <div class="result-container" id="terminal-container">
+        <div class="result-header">
+          <span class="result-title">Respuesta del Servidor (Vercel)</span>
+          <span id="response-status" class="status-badge success" style="display: none;">200 OK</span>
+        </div>
+        <div class="result-body">
+          <pre id="response-output">Elige un endpoint y haz clic en enviar para ver la respuesta aquí...</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    function toggleFlip() {
+      const card = document.getElementById('passportCard');
+      card.classList.toggle('flipped');
+      card.classList.remove('hover-flip');
+      setTimeout(() => {
+        if(!card.classList.contains('flipped')) {
+          card.classList.add('hover-flip');
+        }
+      }, 700);
+    }
+
+    function toggleField(event, fieldId) {
+      event.stopPropagation();
+
+      const field = document.getElementById(fieldId);
+      const btn = document.getElementById('btn-' + fieldId);
+      const real = field.getAttribute('data-real');
+      const masked = field.getAttribute('data-masked');
+      
+      const isCurrentlyMasked = (field.innerText === masked);
+      
+      if (isCurrentlyMasked) {
+        field.innerText = real;
+        field.classList.remove('masked');
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        `;
+      } else {
+        field.innerText = masked;
+        field.classList.add('masked');
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        `;
+      }
+    }
+
+    function toggleTxDetails(detailsId) {
+      const el = document.getElementById(detailsId);
+      el.classList.toggle('active');
+    }
+
+    function toggleTechPanel() {
+      const panel = document.getElementById('techPanelSection');
+      const btn = document.getElementById('togglePanelBtn');
+      const isVisible = panel.classList.contains('active');
+      
+      if (isVisible) {
+        panel.classList.remove('active');
+        btn.innerHTML = `
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+          Ver Panel de Pruebas (API)
+        `;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        panel.classList.add('active');
+        btn.innerHTML = `
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Ocultar Panel de Pruebas
+        `;
+        setTimeout(() => {
+          panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+
+    function switchTab(tabId) {
+      // Hide all contents
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      // Show targeted content
+      document.getElementById('tab-' + tabId).style.display = 'block';
+      
+      // Update active state in buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      // Hide server response terminal when viewing ledger tab for cleaner UI
+      const terminal = document.getElementById('terminal-container');
+      if (tabId === 'ledger') {
+        terminal.style.display = 'none';
+      } else {
+        terminal.style.display = 'block';
+      }
+    }
+
+    async function handleSubmit(event, path, method) {
+      event.preventDefault();
+      
+      const statusBadge = document.getElementById('response-status');
+      const responseOutput = document.getElementById('response-output');
+      
+      statusBadge.style.display = 'none';
+      responseOutput.innerText = 'Enviando petición a ' + path + '...';
+      responseOutput.style.color = 'var(--text-muted)';
+      
+      try {
+        let url = path;
+        let options = {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+
+        if (method === 'GET') {
+          const form = event.target;
+          const wallet = form.querySelector('input').value;
+          url += '?studentWallet=' + encodeURIComponent(wallet);
+        } else {
+          const form = event.target;
+          const bodyData = {};
+          
+          if (path === '/api/disbursement') {
+            bodyData.studentWallet = document.getElementById('disb-wallet').value;
+            bodyData.partnerId = parseInt(document.getElementById('disb-partner').value, 10);
+            bodyData.amount = document.getElementById('disb-amount').value;
+            
+            const token = document.getElementById('disb-token').value;
+            if (token) {
+              options.headers['Authorization'] = 'Bearer ' + token;
+            }
+          } else if (path === '/api/challenge') {
+            bodyData.studentWallet = document.getElementById('chal-wallet').value;
+            bodyData.challengeId = parseInt(document.getElementById('chal-id').value, 10);
+            bodyData.reputationBoost = parseInt(document.getElementById('chal-boost').value, 10);
+          } else if (path === '/api/reputation') {
+            bodyData.studentWallet = document.getElementById('rep-wallet').value;
+            bodyData.reputation = parseInt(document.getElementById('rep-points').value, 10);
+          } else if (path === '/api/claim') {
+            bodyData.studentWallet = document.getElementById('claim-wallet').value;
+            bodyData.partnerId = parseInt(document.getElementById('claim-partner').value, 10);
+            bodyData.amount = document.getElementById('claim-amount').value;
+          }
+          
+          options.body = JSON.stringify(bodyData);
+        }
+
+        const res = await fetch(url, options);
+        const data = await res.json();
+        
+        statusBadge.innerText = res.status + ' ' + res.statusText;
+        statusBadge.style.display = 'inline-block';
+        
+        if (res.ok) {
+          statusBadge.className = 'status-badge success';
+          responseOutput.style.color = '#34d399';
+        } else {
+          statusBadge.className = 'status-badge error';
+          responseOutput.style.color = '#f87171';
+        }
+        
+        responseOutput.innerText = JSON.stringify(data, null, 2);
+      } catch (error) {
+        statusBadge.innerText = 'ERROR';
+        statusBadge.style.display = 'inline-block';
+        statusBadge.className = 'status-badge error';
+        responseOutput.style.color = '#f87171';
+        responseOutput.innerText = 'Error al conectar con el servidor:\n' + error.message;
+      }
+    }
+  </script>
+</body>
+</html>

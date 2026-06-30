@@ -7,6 +7,14 @@
       "config": {
         "maxDuration": 30
       }
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "assets/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -25,6 +33,18 @@
     {
       "src": "/api/reputation",
       "dest": "api/reputation.ts"
+    },
+    {
+      "src": "/api/claim",
+      "dest": "api/claim.ts"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/(index.html)?",
+      "dest": "/index.html"
     }
   ]
 }
