@@ -13,8 +13,8 @@ import { getKMSClient } from '../src/lib/kms';
 
 // Configuration
 const SOROBAN_RPC_URL = process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
-const ESCROW_CONTRACT_ID = process.env.ESCROW_CONTRACT_ID || 'CD5L453U2XWNG2K2ND5L4W7LWD6Z5N2WCD5L4W7LWD6Z5N2WCD5L4W7L';
-const ADMIN_PUBLIC_KEY = process.env.ADMIN_PUBLIC_KEY || 'GDQD...'; // ONLY public key, NO secret key exposed
+const ESCROW_CONTRACT_ID = process.env.ESCROW_CONTRACT_ID || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4';
+const ADMIN_PUBLIC_KEY = process.env.ADMIN_PUBLIC_KEY || 'GASSH2KYFKDORIUVGWC26W6TOLZ3VM2BKOE7WQYCI6HROED3Q63TKPOE'; // ONLY public key, NO secret key exposed
 
 const rpcServer = new rpc.Server(SOROBAN_RPC_URL);
 

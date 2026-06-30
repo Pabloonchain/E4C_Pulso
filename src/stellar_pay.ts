@@ -15,7 +15,7 @@ dotenv.config();
 
 // Configure connection endpoints for Stellar Testnet
 const SOROBAN_RPC_URL = process.env.SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
-const ESCROW_CONTRACT_ID = process.env.ESCROW_CONTRACT_ID || 'CD5L453U2XWNG2K2ND5L4W7LWD6Z5N2WCD5L4W7LWD6Z5N2WCD5L4W7L'; // Placeholder
+const ESCROW_CONTRACT_ID = process.env.ESCROW_CONTRACT_ID || 'CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABSC4'; // Placeholder
 const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY || 'SBCXP...'; // Admin secret key
 
 const rpcServer = new rpc.Server(SOROBAN_RPC_URL);
