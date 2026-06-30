@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.ts",
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 30
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/passport",
+      "dest": "api/passport.ts"
+    },
+    {
+      "src": "/api/disbursement",
+      "dest": "api/disbursement.ts"
+    },
+    {
+      "src": "/api/challenge",
+      "dest": "api/challenge.ts"
+    },
+    {
+      "src": "/api/reputation",
+      "dest": "api/reputation.ts"
+    }
+  ]
+}
