@@ -6,14 +6,14 @@ dotenv.config();
 const PRIVY_APP_ID = process.env.PRIVY_APP_ID || 'your-privy-app-id';
 const PRIVY_APP_SECRET = process.env.PRIVY_APP_SECRET || 'your-privy-app-secret';
 
-// Initialize the Privy Client with the required options object
+// Inicializa el Cliente de Privy con las credenciales de la aplicación
 export const privy = new PrivyClient({
   appId: PRIVY_APP_ID,
   appSecret: PRIVY_APP_SECRET,
 });
 
 /**
- * Interface representing the details of the student after verification.
+ * Interfaz que representa los detalles del estudiante luego de su verificación exitosa.
  */
 export interface VerifiedStudent {
   userId: string;
@@ -22,11 +22,11 @@ export interface VerifiedStudent {
 }
 
 /**
- * Validates a student's Privy authentication token (JWT), verifies they logged in using
- * their institutional Google account, and retrieves their embedded Stellar wallet.
+ * Valida el token de autenticación (JWT) de Privy de un alumno, comprueba que haya ingresado
+ * usando su correo electrónico institucional de Google y recupera su billetera Stellar embebida.
  * 
- * @param authToken JWT token sent by the student client application
- * @returns Object with student userId, email, and embedded Stellar wallet address
+ * @param authToken Token JWT enviado por la aplicación cliente del estudiante
+ * @returns Objeto con el userId, email y la dirección de la billetera Stellar embebida del estudiante
  */
 export async function verifyAndGetStudentWallet(authToken: string): Promise<VerifiedStudent> {
   try {
@@ -34,14 +34,14 @@ export async function verifyAndGetStudentWallet(authToken: string): Promise<Veri
     let user: User;
 
     try {
-      // In a real-world server, we verify the JWT/ID token.
-      // If authToken is an identity token, we use:
+      // En un entorno de producción, verificamos el token JWT.
+      // Si el authToken es un token de identidad:
       // user = await privy.users().get({ id_token: authToken });
-      // If it is an access token, we decode/verify it and load the user:
+      // Si es un token de acceso, lo decodificamos y cargamos el usuario:
       user = await privy.users()._get(userId);
     } catch (e) {
       console.log('[Privy] API credentials not configured or invalid. Falling back to simulated student user.');
-      // Mock fallback user object conforming to the SDK's User interface
+      // Mock de usuario de respaldo que cumple con la interfaz User del SDK de Privy
       user = {
         id: userId,
         created_at: Math.floor(Date.now() / 1000),
@@ -69,7 +69,7 @@ export async function verifyAndGetStudentWallet(authToken: string): Promise<Veri
       };
     }
 
-    // Extract email from linked accounts
+    // Extrae el correo electrónico de las cuentas vinculadas del usuario
     let email = '';
     const googleAccount = user.linked_accounts.find((acc) => acc.type === 'google_oauth') as any;
     if (googleAccount) {
@@ -89,14 +89,14 @@ export async function verifyAndGetStudentWallet(authToken: string): Promise<Veri
       throw new Error(`Unauthorized email domain: ${email}. Only institutional emails are allowed.`);
     }
 
-    // Extract embedded wallet address
+    // Extrae la dirección de la billetera embebida
     const embeddedWallet = user.linked_accounts.find(
       (acc) => acc.type === 'wallet' && (acc as any).connector_type === 'embedded'
     ) as any;
 
     let stellarWalletAddress = embeddedWallet ? embeddedWallet.address : '';
 
-    // Fallback/Simulate for Testnet if not specifically a Stellar address format (starts with 'G')
+    // Respaldo/Simulación para Testnet si no es específicamente una dirección con formato de Stellar (comienza con 'G')
     if (!stellarWalletAddress || !stellarWalletAddress.startsWith('G')) {
       stellarWalletAddress = deriveStellarWalletFromUserId(user.id);
     }
@@ -113,7 +113,7 @@ export async function verifyAndGetStudentWallet(authToken: string): Promise<Veri
 }
 
 /**
- * Checks if the email matches the school/institutional domain rules.
+ * Verifica si el correo coincide con las reglas de dominio escolar o institucional permitido.
  */
 export function isInstitutionalEmail(email: string): boolean {
   const institutionalDomains = [
@@ -128,8 +128,8 @@ export function isInstitutionalEmail(email: string): boolean {
 }
 
 /**
- * Utility to derive a stable mockup Stellar address for testnet mapping
- * in case a native Stellar wallet is not directly returned by standard Privy embedded wallets.
+ * Utilidad para derivar una dirección Stellar mock estable para el mapeo en Testnet
+ * en caso de que la billetera embebida de Privy no devuelva directamente un formato nativo de Stellar.
  */
 function deriveStellarWalletFromUserId(userId: string): string {
   const hash = Buffer.from(userId).toString('hex').padEnd(54, '0').slice(0, 54).toUpperCase();
