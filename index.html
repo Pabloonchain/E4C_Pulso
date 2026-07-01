@@ -389,7 +389,7 @@
 
     .info-value.masked {
       font-family: 'Courier Prime', monospace;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.16em;
       color: #38bdf8;
     }
 
@@ -662,22 +662,24 @@
       font-size: 0.8rem;
     }
 
-    .tx-hash-link {
-      font-family: 'Courier Prime', monospace;
+    .btn-details-toggle {
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.3);
       color: var(--accent-secondary);
-      text-decoration: none;
       cursor: pointer;
-      font-size: 0.78rem;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 320px;
-      transition: color 0.15s ease;
+      font-size: 0.72rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 0.35rem;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.2s ease;
+      font-weight: 600;
     }
 
-    .tx-hash-link:hover {
+    .btn-details-toggle:hover {
+      background: rgba(6, 182, 212, 0.16);
+      border-color: rgba(6, 182, 212, 0.6);
       color: white;
-      text-decoration: underline;
     }
 
     .badge-reputation {
@@ -809,7 +811,7 @@
               <div class="info-block" style="grid-column: span 2;">
                 <span class="info-label">Apellidos y Nombres / Surname & Names</span>
                 <div class="info-value-container">
-                  <span class="info-value masked" id="studentName" data-real="GOMEZ PABLO SEBASTIÁN" data-masked="G●●●Z P●●●O S●●●●●●IÁN">G●●●Z P●●●O S●●●●●●IÁN</span>
+                  <span class="info-value masked" id="studentName" data-real="GOMEZ PABLO SEBASTIÁN" data-masked="●●●●●●●●●●●●●●●●●●●●●">●●●●●●●●●●●●●●●●●●●●●</span>
                   <button class="btn-eye" id="btn-studentName" onclick="toggleField(event, 'studentName');" title="Mostrar/Ocultar Nombre">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
@@ -820,7 +822,7 @@
               <div class="info-block">
                 <span class="info-label">Nro. Documento / DNI</span>
                 <div class="info-value-container">
-                  <span class="info-value masked" id="studentDni" data-real="42.671.789" data-masked="●●.●●●.789">●●.●●●.789</span>
+                  <span class="info-value masked" id="studentDni" data-real="42.671.789" data-masked="●●●●●●●●●●">●●●●●●●●●●</span>
                   <button class="btn-eye" id="btn-studentDni" onclick="toggleField(event, 'studentDni');" title="Mostrar/Ocultar DNI">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
@@ -837,7 +839,7 @@
               <div class="info-block">
                 <span class="info-label">Curso / Course</span>
                 <div class="info-value-container">
-                  <span class="info-value masked" id="studentCourse" data-real="1ro 3ra" data-masked="●ro ●ra">●ro ●ra</span>
+                  <span class="info-value masked" id="studentCourse" data-real="1ro 3ra" data-masked="●●●●●●●">●●●●●●●</span>
                   <button class="btn-eye" id="btn-studentCourse" onclick="toggleField(event, 'studentCourse');" title="Mostrar/Ocultar Curso">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
@@ -854,7 +856,7 @@
               <div class="info-block" style="grid-column: span 2;">
                 <span class="info-label">Dirección Wallet / Stellar Wallet</span>
                 <div class="info-value-container">
-                  <span class="info-value masked" id="studentWallet" data-real="GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777" data-masked="GB2Z46...XYZ77777" style="font-size: 0.75rem; color: var(--accent-secondary);">GB2Z46...XYZ77777</span>
+                  <span class="info-value masked" id="studentWallet" data-real="GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777" data-masked="●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●" style="font-size: 0.75rem; color: var(--accent-secondary);">●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●</span>
                   <button class="btn-eye" id="btn-studentWallet" onclick="toggleField(event, 'studentWallet');" title="Mostrar/Ocultar Billetera">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </button>
@@ -1043,11 +1045,29 @@
         </form>
       </div>
 
-      <!-- Tab Content: Ledger Timeline -->
+      <!-- Tab Content: Ledger Timeline (Consola de Canjes Mejorada) -->
       <div id="tab-ledger" class="tab-content" style="display: none;">
-        <div class="ledger-title" style="border: none; margin-bottom: 0.75rem; padding-bottom: 0;">
+        <div class="ledger-title" style="border: none; margin-bottom: 0.5rem; padding-bottom: 0;">
           <span class="status-dot-pulse"></span>
-          <span>Historial de Desafíos & Transacciones Ledger</span>
+          <span>Consola de Canjes & Transacciones Ledger (Stellar Testnet)</span>
+        </div>
+        
+        <!-- Live Ledger Stats Banner -->
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); padding: 0.85rem; border-radius: 0.75rem;">
+          <div style="flex: 1; min-width: 120px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Total Desembolsado</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: var(--accent-success); font-family: 'Outfit', sans-serif;">$60.00 USDC</div>
+          </div>
+          <div style="flex: 1; min-width: 120px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Ledger Height</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: var(--text-main); font-family: 'Courier Prime', monospace;">#52,960,488</div>
+          </div>
+          <div style="flex: 1; min-width: 120px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Estado de Red</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: var(--accent-secondary); display: flex; align-items: center; gap: 0.3rem;">
+              <span class="status-dot-pulse" style="width: 8px; height: 8px;"></span> TESTNET ACTIVA
+            </div>
+          </div>
         </div>
         
         <div class="ledger-timeline">
@@ -1062,9 +1082,11 @@
             </div>
             <div class="ledger-item-details">
               <span class="badge-reputation">+150 Puntos</span>
-              <a class="tx-hash-link" onclick="toggleTxDetails('tx-details-1')" title="Ver detalles de la transacción en Stellar">
-                Tx: 7ad62f3e82b9a10c...d7c6d7
-              </a>
+              <span style="font-family: 'Courier Prime', monospace; font-size: 0.72rem; color: var(--text-muted);">Tx: 7ad62f3e82...d7c6d7</span>
+              <button class="btn-details-toggle" onclick="toggleRedemptionDetails(this, 'tx-details-1')">
+                Mostrar detalles
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
             </div>
             <div class="tx-details-dropdown" id="tx-details-1">
               <strong>STELLAR SOROBAN INVOCATION DETAILS:</strong><br>
@@ -1092,9 +1114,11 @@
             </div>
             <div class="ledger-item-details">
               <span class="badge-reputation">+250 Puntos</span>
-              <a class="tx-hash-link" onclick="toggleTxDetails('tx-details-2')" title="Ver detalles de la transacción en Stellar">
-                Tx: 2ef9518d6e3bc04d...d7e8b2
-              </a>
+              <span style="font-family: 'Courier Prime', monospace; font-size: 0.72rem; color: var(--text-muted);">Tx: 2ef9518d6e...d7e8b2</span>
+              <button class="btn-details-toggle" onclick="toggleRedemptionDetails(this, 'tx-details-2')">
+                Mostrar detalles
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
             </div>
             <div class="tx-details-dropdown" id="tx-details-2">
               <strong>STELLAR SOROBAN INVOCATION DETAILS:</strong><br>
@@ -1122,9 +1146,11 @@
             </div>
             <div class="ledger-item-details">
               <span class="badge-reputation">+200 Puntos</span>
-              <a class="tx-hash-link" onclick="toggleTxDetails('tx-details-3')" title="Ver detalles de la transacción en Stellar">
-                Tx: c9b0e2f3a4b5c6d7...a8b9c0
-              </a>
+              <span style="font-family: 'Courier Prime', monospace; font-size: 0.72rem; color: var(--text-muted);">Tx: c9b0e2f3a4...a8b9c0</span>
+              <button class="btn-details-toggle" onclick="toggleRedemptionDetails(this, 'tx-details-3')">
+                Mostrar detalles
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
             </div>
             <div class="tx-details-dropdown" id="tx-details-3">
               <strong>STELLAR SOROBAN INVOCATION DETAILS:</strong><br>
@@ -1193,9 +1219,20 @@
       }
     }
 
-    function toggleTxDetails(detailsId) {
+    function toggleRedemptionDetails(btn, detailsId) {
       const el = document.getElementById(detailsId);
-      el.classList.toggle('active');
+      const isExpanded = el.classList.toggle('active');
+      if (isExpanded) {
+        btn.innerHTML = `
+          Ocultar detalles
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polyline points="18 15 12 9 6 15"/></svg>
+        `;
+      } else {
+        btn.innerHTML = `
+          Mostrar detalles
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 2px;"><polyline points="6 9 12 15 18 9"/></svg>
+        `;
+      }
     }
 
     function toggleTechPanel() {

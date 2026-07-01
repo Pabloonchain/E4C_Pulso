@@ -16,11 +16,11 @@ Para simular un documento oficial físico de alta seguridad, la credencial incor
 * **Código de Barras:** Ubicado en el pie del documento al lado del código MRZ (Machine Readable Zone).
 
 ### 1.2 Control de Enmascaramiento y Privacidad (Show/Hide)
-Ciertos datos sensibles cargan de forma enmascarada (con círculos celestes `●●●●`) para proteger la privacidad. Se pueden revelar individualmente presionando el ícono de ojo (👁️):
+Todos los caracteres de los datos sensibles cargan 100% ocultos de forma predeterminada (representados únicamente por círculos `●●●●`) para proteger por completo la privacidad. Se pueden revelar individualmente presionando el ícono de ojo (👁️):
 * **Apellidos y Nombres:** Gomez Pablo Sebastián (Oculto/Visible).
-* **Nro. Documento / DNI:** XX.XXX.789 (Oculto/Visible).
+* **Nro. Documento / DNI:** 42.671.789 (Oculto/Visible).
 * **Curso / Clase:** 1ro 3ra (Oculto/Visible).
-* **Dirección Stellar Wallet:** La clave pública completa (`GB2Z46...XYZ77777`).
+* **Dirección Stellar Wallet:** La clave pública completa (`GB2Z4633MOCKSTUDENTWALLETADDRESSXYZ77777`).
 
 ### 1.3 Interacción de Giro (Sellos de Visa)
 Haciendo clic sobre cualquier parte del pasaporte (fuera de los íconos de ojo) o presionando el botón **"Girar Pasaporte"**, la credencial dará una vuelta tridimensional revelando el reverso:
@@ -31,17 +31,17 @@ Haciendo clic sobre cualquier parte del pasaporte (fuera de los íconos de ojo) 
 
 ---
 
-## 2. Historial de Desafíos & Transacciones Ledger
+## 2. Consola de Canjes & Transacciones Ledger
 Ubicado dentro del panel técnico, registra cronológicamente las transacciones certificadas en la red Stellar Testnet.
 
-### 2.1 Timeline de Eventos
-Muestra el historial real/simulado de desafíos escolares completados:
+### 2.1 Timeline de Eventos & Estadísticas
+Muestra un panel informativo con el Total Desembolsado, el Ledger Height de la red y el estado en vivo de Testnet, seguido del historial de desafíos escolares completados:
 1. **Asistencia Perfecta** (28 Jun 2026, 10:14 AM) • +150 Puntos de Reputación.
 2. **Mejor Alumno** (29 Jun 2026, 02:32 PM) • +250 Puntos de Reputación.
 3. **Desempeño en Matemáticas** (30 Jun 2026, 11:05 AM) • +200 Puntos de Reputación.
 
 ### 2.2 Auditoría de Firmas Stellar
-Cada transacción tiene un hash interactivo (Tx Hash). Al hacer clic en él, se despliega el bloque de detalles de la invocación en Soroban:
+Cada transacción tiene un botón de alternancia interactivo que dice **"Mostrar detalles"**. Al hacer clic en él, cambia dinámicamente a **"Ocultar detalles"** y despliega el bloque de detalles de la invocación en Soroban:
 * **Ledger Block:** El bloque específico de Stellar en el que se validó la transacción.
 * **Contrato Inteligente:** La dirección del contrato `partner_escrow` en Testnet.
 * **Función Invocada:** `add_student_challenge(student, challenge_id, boost)`.
