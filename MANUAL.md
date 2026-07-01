@@ -52,10 +52,16 @@ Cada transacción tiene un botón de alternancia interactivo que dice **"Mostrar
 
 ---
 
-## 3. Consola de Desarrollo Serverless (API Explorer)
-Permite realizar peticiones manuales a los endpoints serverless de Vercel y observar las respuestas JSON en tiempo real.
+## 3. Detalles (API Explorer & Terminal de Monitoreo)
+Esta sección expandible (activada mediante el botón **"Ver detalles"**) proporciona el panel técnico de control e inspección.
 
-### 3.1 Endpoints Disponibles
+### 3.1 Terminal de Respuestas API (Hacker Terminal)
+La respuesta de cada endpoint se imprime directamente en una terminal interactiva rediseñada que emula una consola de desarrollo UNIX:
+*   **Controles de Ventana Simulaodos:** Incluye botones cromáticos (rojo, amarillo, verde) para un diseño de fidelidad premium.
+*   **Filtro Dinámico de Respuestas:** El color del texto de la respuesta se adapta según el código de estado HTTP devuelto por los endpoints en Vercel (verde para respuestas exitosas, rojo para fallos de red o errores de validación).
+*   **Leds de Estado RPC:** Una luz piloto parpadeante al lado de las insignias HTTP indica la conectividad activa con Stellar Testnet.
+
+### 3.2 Endpoints Disponibles
 
 #### A. Consultar Pasaporte (`GET /api/passport`)
 * **Uso:** Obtiene el estado de la reputación y los desafíos completados de un estudiante en la blockchain.
