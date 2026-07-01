@@ -710,7 +710,7 @@
       animation: slideDownFade 0.25s ease-out;
     }
 
-    /* --- TECH DETAIL PANEL --- */
+    /* --- TECH DETAIL PANEL (RE-STYLED DEV CONSOLE) --- */
     .tech-panel-section {
       max-width: 900px;
       width: 90%;
@@ -728,6 +728,99 @@
 
     .tech-panel-section .glass-card {
       padding: 2rem;
+    }
+
+    .tabs-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      border-radius: 0.5rem;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(99, 102, 241, 0.15));
+      border-color: var(--accent-secondary);
+      color: white;
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);
+    }
+
+    .tab-content {
+      animation: fadeInDown 0.4s ease;
+    }
+
+    /* Forms re-styling */
+    input[type="text"], input[type="number"], input[type="password"] {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--card-border);
+      border-radius: 0.5rem;
+      padding: 0.65rem 0.85rem;
+      color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent-secondary);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.18);
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .form-group {
+      margin-bottom: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .form-group label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border: none;
+      border-radius: 0.6rem;
+      padding: 0.75rem;
+      color: white;
+      font-weight: 700;
+      font-family: 'Outfit', sans-serif;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.35);
     }
 
     /* Keyframe Animations */
@@ -934,7 +1027,7 @@
 
       <button class="passport-btn-flip tech-btn" id="togglePanelBtn" onclick="toggleTechPanel(); event.stopPropagation();">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-        Ver Panel de Pruebas (API)
+        Ver detalles
       </button>
     </div>
     
@@ -945,8 +1038,8 @@
   <section class="tech-panel-section" id="techPanelSection">
     <div class="glass-card tabs-container">
       <div style="border-bottom: 1px solid var(--card-border); padding-bottom: 0.75rem;">
-        <h3 style="font-family: 'Outfit', sans-serif; font-weight: 700;">Consola de Desarrollo Serverless</h3>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">Prueba manual de los endpoints del backend y visualización de transacciones ledger</p>
+        <h3 style="font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.4rem; background: linear-gradient(135deg, #ffffff, #9ca3af); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Detalles</h3>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Monitoreo técnico de la infraestructura, endpoints de la API y transacciones en Stellar Testnet</p>
       </div>
 
       <div class="tabs-header">
@@ -1169,14 +1262,24 @@
         </div>
       </div>
 
-      <!-- Result Terminal -->
-      <div class="result-container" id="terminal-container">
-        <div class="result-header">
-          <span class="result-title">Respuesta del Servidor (Vercel)</span>
-          <span id="response-status" class="status-badge success" style="display: none;">200 OK</span>
+      <!-- Result Terminal (Sleek Hacker Terminal Design) -->
+      <div class="result-container" id="terminal-container" style="margin-top: 1.5rem; background: rgba(5, 8, 16, 0.8); border: 1px solid var(--card-border); border-radius: 1rem; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <!-- Terminal Header -->
+        <div style="background: rgba(0,0,0,0.4); padding: 0.65rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <div style="display: flex; align-items: center; gap: 0.4rem;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; display: inline-block;"></span>
+            <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #f59e0b; display: inline-block;"></span>
+            <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #10b981; display: inline-block;"></span>
+            <span style="margin-left: 0.4rem; font-family: 'Courier Prime', monospace; font-size: 0.72rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Terminal de Respuestas API</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.45rem;">
+            <span class="status-dot-pulse" style="width: 6px; height: 6px; background-color: var(--accent-success); box-shadow: 0 0 8px var(--accent-success);"></span>
+            <span id="response-status" class="status-badge success" style="display: none; font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 0.2rem; font-weight: 800; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399;">200 OK</span>
+          </div>
         </div>
-        <div class="result-body">
-          <pre id="response-output">Elige un endpoint y haz clic en enviar para ver la respuesta aquí...</pre>
+        <!-- Terminal Body -->
+        <div style="padding: 1.25rem; min-height: 120px; max-height: 250px; overflow-y: auto; font-family: 'Courier Prime', monospace; font-size: 0.8rem; line-height: 1.5; color: #a5b4fc; position: relative;">
+          <pre id="response-output" style="white-space: pre-wrap; word-break: break-all;">Selecciona un método en las pestañas superiores y ejecuta la llamada para monitorear la respuesta del contrato inteligente...</pre>
         </div>
       </div>
     </div>
@@ -1244,14 +1347,14 @@
         panel.classList.remove('active');
         btn.innerHTML = `
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-          Ver Panel de Pruebas (API)
+          Ver detalles
         `;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         panel.classList.add('active');
         btn.innerHTML = `
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Ocultar Panel de Pruebas
+          Ocultar detalles
         `;
         setTimeout(() => {
           panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
